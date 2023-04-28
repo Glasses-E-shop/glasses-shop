@@ -1,0 +1,3 @@
+[submodule "Business-Logic-Service"]
+	path = Business-Logic-Service
+	url = https://github.com/Glasses-E-shop/Business-Logic-Service.git
