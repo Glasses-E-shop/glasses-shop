@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend/
+    ports:
+      - "8080:8080"
+    networks:
+      - ochelari_network
+
+  db:
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+    volumes:
+      - db:/var/lib/mysql
+      - "./data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      - ochelari_network
+
+  portainer:
+    image: portainer/portainer-ee:2.18.1
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - ochelari_network
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - ochelari_network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - ochelari_network
+    depends_on:
+      - prometheus
+
+volumes:
+  db:
+  portainer_data:
+
+
+networks:
+  ochelari_network:
