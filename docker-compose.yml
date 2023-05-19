@@ -21,6 +21,16 @@ services:
     networks:
       - ochelari_network
 
+  adminer_container:
+    image: adminer:latest
+    environment: 
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: galkaev
+    ports: 
+      - "8082:8080"
+    networks:
+      - ochelari_network
+
   portainer:
     image: portainer/portainer-ee:2.18.1
     ports:
