@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   backend:
-    build: ./backend/
+    image: ce7ar/glasses-shop-backend:latest
     ports:
       - "8080:8080"
     networks:
       - ochelari_network
 
   db:
-    image: mysql
+    image: mysql:latest
     restart: always
     ports:
       - "3306:3306"
@@ -23,28 +23,36 @@ services:
 
   adminer_container:
     image: adminer:latest
-    environment: 
+    environment:
       ADMINER_DEFAULT_SERVER: db
       ADMINER_DESIGN: galkaev
-    ports: 
+    ports:
       - "8082:8080"
     networks:
       - ochelari_network
 
   portainer:
-    image: portainer/portainer-ee:2.18.1
+    image: portainer/portainer-ee:latest
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
     ports:
       - "8000:8000"
+      - "9000:9000"
       - "9443:9443"
-    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     networks:
       - ochelari_network
+  agent:
+    image: portainer/agent:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - ochelari_network
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:latest
     ports:
       - "9090:9090"
     volumes:
@@ -53,13 +61,40 @@ services:
       - ochelari_network
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    environment:
+      GF_SERVER_ROOT_URL: /grafana/
+      GF_SERVER_SERVE_FROM_SUBPATH: true
+      GF_SERVER_ENFORCE_DOMAIN: false
     networks:
       - ochelari_network
     depends_on:
       - prometheus
+
+  kong:
+    image: kong:latest
+    volumes:
+      - "./Kong:/usr/local/kong/declarative"
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+    ports:
+      - "80:8000"
+      - "443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    # deploy:
+    #   placement:
+    #     constraints: [node.role == manager]
+    networks:
+      - ochelari_network
 
 volumes:
   db:
