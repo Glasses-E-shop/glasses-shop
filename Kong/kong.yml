@@ -8,6 +8,27 @@ services:
       paths:
       - /glasses
 
+  - name: glasses-auth
+    url: http://auth:8080/
+    routes:
+    - name: glasses-auth-route
+      paths:
+      - /auth
+
+  - name: glasses-email
+    url: http://email:8080/
+    routes:
+    - name: glasses-email-route
+      paths:
+      - /email
+
+  - name: glasses-db
+    url: http://db:3306/
+    routes:
+    - name: glasses-db-route
+      paths:
+      - /db
+
   - name: grafana
     url: http://grafana:3000/
     routes:

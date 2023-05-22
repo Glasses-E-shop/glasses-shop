@@ -6,12 +6,55 @@ services:
     ports:
       - "8080:8080"
     deploy:
-      replicas: 1
+      mode: global
       update_config:
         order: start-first
       rollback_config:
         order: stop-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - ochelari_network
+      - email_network
 
+  email:
+    image: ce7ar/emailimage:latest
+    container_name: email-service
+    ports:
+      - "8084:8080"
+    deploy:
+      mode: global
+      update_config:
+        order: start-first
+      rollback_config:
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - email_network
+
+  auth:
+    image: ce7ar/authimage:latest
+    container_name: auth
+    ports:
+      - "8081:8080"
+    deploy:
+      mode: global
+      update_config:
+        order: start-first
+      rollback_config:
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     networks:
       - ochelari_network
 
@@ -117,6 +160,7 @@ services:
       - ochelari_network
       - monitoring_network
       - portainer_network
+      - email_network
 
 volumes:
   db:
@@ -126,6 +170,7 @@ volumes:
 networks:
   ochelari_network:
   monitoring_network:
+  email_network:
   portainer_network:
     driver: overlay
     attachable: true
