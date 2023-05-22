@@ -1,6 +1,13 @@
 _format_version: "2.1"
 
 services:
+  - name: glasses-shop
+    url: http://backend:8080/
+    routes:
+    - name: glasses-shop-route
+      paths:
+      - /glasses
+
   - name: grafana
     url: http://grafana:3000/
     routes:
